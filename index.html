@@ -1,4 +1,3 @@
-html
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,52 +6,106 @@ html
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- Библиотека для CSV и кластеризации -->
     <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
         body { margin:0; padding:0; }
         #map { position:absolute; top:0; bottom:0; width:100%; }
+        #debug { 
+            position: absolute; 
+            bottom: 10px; 
+            left: 10px; 
+            background: rgba(255,255,255,0.9); 
+            padding: 8px 12px; 
+            z-index: 1000; 
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+            border-left: 4px solid #3388ff;
+        }
     </style>
 </head>
 <body>
     <div id="map"></div>
+    <div id="debug">⏳ Загрузка данных...</div>
     <script>
-        var map = L.map('map').setView([55.0, 37.0], 4); // Центр на Россию
+        var map = L.map('map').setView([55.0, 37.0], 4);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         }).addTo(map);
 
         var markers = L.markerClusterGroup();
+        var debugDiv = document.getElementById('debug');
+        var pointCount = 0;
 
-        // Загрузка CSV из папки data
-        Papa.parse("trachys_min_occurences", {
+        function updateDebug(text, isError) {
+            debugDiv.innerHTML = text;
+            debugDiv.style.borderLeftColor = isError ? '#ff4444' : '#3388ff';
+            console.log(text);
+        }
+
+        // Загрузка CSV - ИСПРАВЛЕНО: добавлено .csv
+        Papa.parse("trachys_min_occurences.csv", {
             download: true,
             header: true,
             skipEmptyLines: true,
+            encoding: 'UTF-8',
             complete: function(results) {
                 var data = results.data;
+                updateDebug('✅ Файл загружен. Строк в CSV: ' + data.length);
+                
+                // Вывод заголовков в консоль
+                console.log('📋 Заголовки CSV:', results.meta.fields);
+                
+                // Проверяем наличие координатных колонок
+                var firstRow = data[0] || {};
+                console.log('📌 Пример первой строки:', firstRow);
+                
                 for (var i = 0; i < data.length; i++) {
                     var row = data[i];
-                    // Проверка наличия координат
-                    if (row["Широта"] && row["Долгота"]) {
-                        var lat = parseFloat(row["Широта"]);
-                        var lng = parseFloat(row["Долгота"]);
+                    
+                    // Пробуем разные варианты названий колонок
+                    var lat = parseFloat(row["Широта"] || row["Широта "] || row["широта"] || row["Latitude"] || row["lat"]);
+                    var lng = parseFloat(row["Долгота"] || row["Долгота "] || row["долгота"] || row["Longitude"] || row["lng"]);
+                    
+                    if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
+                        var author = row["Автор"] || row["Author"] || "N/A";
+                        var year = row["Год публикации"] || row["Year"] || "N/A";
+                        var place = row["Место"] || row["Place"] || "N/A";
+                        var link = row["Ссылка"] || row["Link"] || "#";
                         
-                        if (!isNaN(lat) && !isNaN(lng)) {
-                            var popupContent = `
-                                <b>${row["Автор"] || 'N/A'}</b><br>
-                                Год: ${row["Год публикации"] || 'N/A'}<br>
-                                Место: ${row["Место"] || 'N/A'}<br>
-                                <a href="${row["Ссылка"]}" target="_blank">Источник</a>
-                            `;
-                            var marker = L.marker([lat, lng]).bindPopup(popupContent);
-                            markers.addLayer(marker);
-                        }
+                        var popupContent = 
+                            '<b>' + author + '</b><br>' +
+                            'Год: ' + year + '<br>' +
+                            'Место: ' + place + '<br>' +
+                            '<a href="' + link + '" target="_blank">📄 Источник</a>';
+                        
+                        var marker = L.marker([lat, lng]).bindPopup(popupContent);
+                        markers.addLayer(marker);
+                        pointCount++;
                     }
                 }
+                
                 map.addLayer(markers);
+                
+                if (pointCount > 0) {
+                    updateDebug('✅ Загружено точек: ' + pointCount + ' из ' + data.length + ' строк');
+                    try {
+                        map.fitBounds(markers.getBounds());
+                    } catch(e) {
+                        console.log('Не удалось автоматически масштабировать');
+                    }
+                } else {
+                    updateDebug('❌ Точки НЕ НАЙДЕНЫ! Проверьте названия колонок в CSV.', true);
+                    console.log('🔍 Искали колонки: Широта/Долгота');
+                    console.log('🔍 Фактические колонки:', results.meta.fields);
+                }
+            },
+            error: function(err) {
+                updateDebug('❌ ОШИБКА загрузки файла: ' + err, true);
+                console.error('Ошибка PapaParse:', err);
             }
         });
     </script>
