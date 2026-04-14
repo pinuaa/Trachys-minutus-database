@@ -27,7 +27,7 @@ html
         var markers = L.markerClusterGroup();
 
         // Загрузка CSV из папки data
-        Papa.parse("data/trachys_min_occurences.csv", {
+        Papa.parse("data/trachys_min_occurences", {
             download: true,
             header: true,
             skipEmptyLines: true,
