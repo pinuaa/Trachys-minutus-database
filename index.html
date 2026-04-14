@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trachys minutus — база данных находок</title>
     
-    <!-- Bootstrap 5 для красивого дизайна -->
+    <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Leaflet для карты -->
+    <!-- Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <!-- MarkerCluster для группировки точек -->
+    <!-- MarkerCluster -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
-    <!-- DataTables для красивой таблицы -->
+    <!-- DataTables -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
     
     <style>
@@ -21,7 +21,6 @@
         }
         .navbar-brand {
             font-weight: 600;
-            letter-spacing: 0.5px;
         }
         .hero {
             background: linear-gradient(135deg, #2b5a3a 0%, #1a3d26 100%);
@@ -29,27 +28,14 @@
             padding: 2rem 0;
             margin-bottom: 2rem;
         }
-        .hero h1 {
-            font-weight: 300;
-            margin-bottom: 0.5rem;
-        }
         .hero h1 i {
             font-style: italic;
-            font-weight: 400;
-        }
-        .hero .badge {
-            background-color: rgba(255,255,255,0.2);
-            color: white;
-            font-size: 0.9rem;
-            padding: 0.5rem 1rem;
-            border-radius: 30px;
         }
         .section-title {
             border-left: 5px solid #2b5a3a;
             padding-left: 1rem;
             margin-bottom: 1.5rem;
             font-weight: 500;
-            color: #1a3d26;
         }
         #map {
             height: 500px;
@@ -57,7 +43,6 @@
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             border: 1px solid #dee2e6;
-            z-index: 1;
         }
         .card {
             border: none;
@@ -81,13 +66,11 @@
             font-size: 2.5rem;
             font-weight: 700;
             color: #2b5a3a;
-            line-height: 1;
         }
         .stat-label {
             color: #6c757d;
             font-size: 0.9rem;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
         .footer {
             margin-top: 3rem;
@@ -98,39 +81,26 @@
         .footer a {
             color: white;
             text-decoration: none;
-            font-weight: 500;
         }
-        .footer a:hover {
-            text-decoration: underline;
-        }
-        .btn-outline-success {
-            border-color: #2b5a3a;
-            color: #2b5a3a;
-        }
-        .btn-outline-success:hover {
-            background-color: #2b5a3a;
-            color: white;
-        }
-        .nav-tabs .nav-link {
-            color: #495057;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            font-weight: 500;
-        }
-        .nav-tabs .nav-link.active {
-            color: #2b5a3a;
-            background-color: transparent;
-            border-bottom: 3px solid #2b5a3a;
-        }
-        #table-status {
-            font-size: 0.9rem;
-        }
-        .dataTables_wrapper {
-            padding: 0;
+        #debug-info {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: #0f0;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 9999;
+            display: none;
         }
     </style>
 </head>
 <body>
+
+<!-- Отладочная информация (скрыта по умолчанию) -->
+<div id="debug-info"></div>
 
 <!-- Навигация -->
 <nav class="navbar navbar-expand-lg bg-white shadow-sm">
@@ -142,11 +112,8 @@
             <a href="README.md" class="btn btn-outline-success btn-sm" target="_blank">
                 📄 README
             </a>
-            <a href="https://github.com/pinuaa/Trachys-minutus-database" class="btn btn-outline-secondary btn-sm ms-2" target="_blank">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-github" viewBox="0 0 16 16" style="margin-right: 4px;">
-                    <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/>
-                </svg>
-                GitHub
+            <a href="trachys_min_occurrences.csv" class="btn btn-outline-secondary btn-sm ms-2" download>
+                ⬇️ Скачать CSV
             </a>
         </div>
     </div>
@@ -155,21 +122,17 @@
 <!-- Заголовок -->
 <div class="hero">
     <div class="container">
-        <h1>
-            База данных находок <i>Trachys minutus</i> (Linnaeus, 1758)
-        </h1>
-        <p class="lead mb-3">
-            Геопривязанные точки сбора минирующей златки по литературным данным
-        </p>
-        <span class="badge">Coleoptera: Buprestidae</span>
-        <span class="badge ms-2">Листовые минеры</span>
+        <h1>База данных находок <i>Trachys minutus</i> (Linnaeus, 1758)</h1>
+        <p class="lead mb-3">Геопривязанные точки сбора минирующей златки по литературным данным</p>
+        <span class="badge bg-light text-dark">Coleoptera: Buprestidae</span>
+        <span class="badge bg-light text-dark ms-2">Листовые минеры</span>
     </div>
 </div>
 
 <!-- Основной контент -->
 <div class="container">
     
-    <!-- Статистика (будет заполнена динамически) -->
+    <!-- Статистика -->
     <div class="stats-box">
         <div class="row text-center">
             <div class="col-md-4">
@@ -187,7 +150,7 @@
         </div>
     </div>
 
-    <!-- Вкладки: Карта и Таблица -->
+    <!-- Вкладки -->
     <ul class="nav nav-tabs mb-4" id="mainTabs" role="tablist">
         <li class="nav-item" role="presentation">
             <button class="nav-link active" id="map-tab" data-bs-toggle="tab" data-bs-target="#map-pane" type="button" role="tab">
@@ -209,7 +172,7 @@
                     <div id="map"></div>
                 </div>
                 <div class="card-footer bg-white text-muted small">
-                    <span id="map-points-count">—</span> точек на карте • Кликните на точку для подробностей
+                    <span id="map-points-count">0</span> точек на карте • Кликните на точку для подробностей
                 </div>
             </div>
         </div>
@@ -217,9 +180,9 @@
         <!-- Панель с таблицей -->
         <div class="tab-pane fade" id="table-pane" role="tabpanel">
             <div class="card">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                    <span><strong>Полный список находок</strong></span>
-                    <span id="table-status" class="text-muted"></span>
+                <div class="card-header bg-white">
+                    <strong>Полный список находок</strong>
+                    <span id="table-status" class="text-muted ms-3"></span>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-container">
@@ -230,13 +193,11 @@
                                     <th>Автор</th>
                                     <th>Страна</th>
                                     <th>Место</th>
-                                    <th>Широта</th>
-                                    <th>Долгота</th>
                                     <th>Источник</th>
                                 </tr>
                             </thead>
                             <tbody id="table-body">
-                                <!-- Заполнится из JS -->
+                                <tr><td colspan="5" class="text-center">Загрузка данных...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -245,9 +206,9 @@
         </div>
     </div>
     
-    <!-- Информация о проекте -->
+    <!-- Информация -->
     <div class="row mt-5">
-        <div class="col-md-6">
+        <div class="col-12">
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">📖 О проекте</h5>
@@ -258,27 +219,9 @@
                     </p>
                     <p class="card-text">
                         <small class="text-muted">
-                            При использовании данных, пожалуйста, ссылайтесь на этот репозиторий 
-                            и оригинальные источники, указанные в таблице.
+                            При использовании данных, пожалуйста, ссылайтесь на этот репозиторий.
                         </small>
                     </p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">📄 README и документация</h5>
-                    <p class="card-text">
-                        Подробное описание структуры данных, источников и правил цитирования 
-                        доступно в файле README.
-                    </p>
-                    <a href="README.md" class="btn btn-success" target="_blank">
-                        Открыть README
-                    </a>
-                    <a href="trachys_min_occurrences.csv" class="btn btn-outline-secondary" download>
-                        ⬇️ Скачать CSV
-                    </a>
                 </div>
             </div>
         </div>
@@ -297,8 +240,7 @@
             </div>
             <div class="col-md-6 text-md-end">
                 <p class="mb-0">
-                    Собрано на основе литературных данных • 
-                    <a href="#" id="citation-link" data-bs-toggle="tooltip" title="Скопировать ссылку для цитирования">📎 Как цитировать</a>
+                    Собрано на основе литературных данных
                 </p>
             </div>
         </div>
@@ -316,6 +258,17 @@
 
 <script>
     (function() {
+        var debugDiv = document.getElementById('debug-info');
+        
+        function log(msg, isError) {
+            console.log(msg);
+            debugDiv.style.display = 'block';
+            debugDiv.innerHTML = msg;
+            if (isError) {
+                debugDiv.style.color = '#f00';
+            }
+        }
+        
         // Инициализация карты
         var map = L.map('map').setView([55.0, 37.0], 4);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
@@ -324,74 +277,107 @@
         
         var markers = L.markerClusterGroup();
         var allData = [];
-        var pointCount = 0;
         
-        // Загрузка и обработка данных
-        Papa.parse("trachys_min_occurrences.csv", {
-            download: true,
-            header: true,
-            skipEmptyLines: true,
-            encoding: 'UTF-8',
-            complete: function(results) {
-                allData = results.data.filter(function(row) {
-                    // Оставляем только строки с координатами
-                    var lat = parseFloat(row["Широта"] || row["Широта "] || row["широта"]);
-                    var lng = parseFloat(row["Долгота"] || row["Долгота "] || row["долгота"]);
-                    return !isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0;
-                });
-                
-                // Заполняем карту
-                allData.forEach(function(row) {
-                    var lat = parseFloat(row["Широта"] || row["Широта "] || row["широта"]);
-                    var lng = parseFloat(row["Долгота"] || row["Долгота "] || row["долгота"]);
-                    
-                    var popupContent = 
-                        '<b>' + (row["Автор"] || 'N/A') + '</b><br>' +
-                        'Год: ' + (row["Год публикации"] || 'N/A') + '<br>' +
-                        'Место: ' + (row["Место"] || 'N/A') + '<br>' +
-                        (row["Ссылка"] ? '<a href="' + row["Ссылка"] + '" target="_blank">📄 Источник</a>' : '');
-                    
-                    var marker = L.marker([lat, lng]).bindPopup(popupContent);
-                    markers.addLayer(marker);
-                    pointCount++;
-                });
-                
-                map.addLayer(markers);
-                if (pointCount > 0) {
-                    map.fitBounds(markers.getBounds());
-                }
-                
-                document.getElementById('map-points-count').textContent = pointCount;
-                
-                // Заполняем статистику
-                updateStatistics(allData);
-                
-                // Заполняем таблицу
-                buildTable(allData);
-            },
-            error: function(err) {
-                console.error('Ошибка загрузки CSV:', err);
+        log('🔄 Начинаем загрузку CSV...');
+        
+        // Пробуем разные варианты имени файла
+        var fileNames = [
+            'trachys_min_occurrences.csv',
+            'trachys_min_occurrences',
+            'TRACHYS MINUTUS DATA BASE.csv',
+            'TRACHYS DATABASE - БАЗА ДАННЫХ.csv',
+            'data/trachys_min_occurrences.csv'
+        ];
+        
+        var currentFileIndex = 0;
+        
+        function tryLoadFile(index) {
+            if (index >= fileNames.length) {
+                log('❌ Все попытки загрузить файл не удались', true);
                 document.getElementById('map-points-count').textContent = 'Ошибка загрузки';
+                document.getElementById('table-body').innerHTML = '<tr><td colspan="5" class="text-center text-danger">Ошибка загрузки файла. Проверьте консоль (F12).</td></tr>';
+                return;
             }
-        });
+            
+            var fileName = fileNames[index];
+            log('🔄 Пробуем загрузить: ' + fileName);
+            
+            Papa.parse(fileName, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                encoding: 'UTF-8',
+                complete: function(results) {
+                    log('✅ Файл загружен! Название: ' + fileName);
+                    
+                    // Фильтруем данные
+                    allData = results.data.filter(function(row) {
+                        var lat = parseFloat(row["Широта"] || row["Широта "] || row["широта"] || row["Latitude"]);
+                        var lng = parseFloat(row["Долгота"] || row["Долгота "] || row["долгота"] || row["Longitude"]);
+                        return !isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0;
+                    });
+                    
+                    log('📊 Найдено записей с координатами: ' + allData.length);
+                    
+                    if (allData.length === 0) {
+                        log('⚠️ Координаты не найдены. Заголовки CSV: ' + JSON.stringify(results.meta.fields), true);
+                    }
+                    
+                    // Заполняем карту
+                    allData.forEach(function(row) {
+                        var lat = parseFloat(row["Широта"] || row["Широта "] || row["широта"] || row["Latitude"]);
+                        var lng = parseFloat(row["Долгота"] || row["Долгота "] || row["долгота"] || row["Longitude"]);
+                        
+                        var popupContent = 
+                            '<b>' + (row["Автор"] || row["Author"] || 'N/A') + '</b><br>' +
+                            'Год: ' + (row["Год публикации"] || row["Year"] || 'N/A') + '<br>' +
+                            'Место: ' + (row["Место"] || row["Place"] || 'N/A') + '<br>' +
+                            (row["Ссылка"] ? '<a href="' + row["Ссылка"] + '" target="_blank">📄 Источник</a>' : '');
+                        
+                        var marker = L.marker([lat, lng]).bindPopup(popupContent);
+                        markers.addLayer(marker);
+                    });
+                    
+                    map.addLayer(markers);
+                    
+                    if (allData.length > 0) {
+                        map.fitBounds(markers.getBounds());
+                    }
+                    
+                    document.getElementById('map-points-count').textContent = allData.length;
+                    
+                    // Статистика
+                    updateStatistics(allData);
+                    
+                    // Таблица
+                    buildTable(allData);
+                    
+                    // Скрываем отладку через 5 секунд
+                    setTimeout(function() {
+                        debugDiv.style.display = 'none';
+                    }, 5000);
+                },
+                error: function(err) {
+                    log('❌ Ошибка загрузки ' + fileName + ': ' + err, true);
+                    // Пробуем следующий файл
+                    tryLoadFile(index + 1);
+                }
+            });
+        }
+        
+        // Запускаем загрузку
+        tryLoadFile(0);
         
         function updateStatistics(data) {
-            // Количество записей
             document.getElementById('total-records').textContent = data.length;
             
-            // Количество уникальных стран
             var countries = new Set();
             data.forEach(function(r) { if (r["Страна"]) countries.add(r["Страна"]); });
             document.getElementById('total-countries').textContent = countries.size;
             
-            // Диапазон лет
             var years = data.map(function(r) { return parseInt(r["Год публикации"]); }).filter(function(y) { return !isNaN(y); });
             if (years.length > 0) {
-                var minYear = Math.min.apply(null, years);
-                var maxYear = Math.max.apply(null, years);
-                document.getElementById('year-range').textContent = minYear + ' – ' + maxYear;
-            } else {
-                document.getElementById('year-range').textContent = '—';
+                document.getElementById('year-range').textContent = Math.min.apply(null, years) + ' – ' + Math.max.apply(null, years);
             }
         }
         
@@ -410,54 +396,51 @@
                     '<td>' + (row["Автор"] || '—') + '</td>' +
                     '<td>' + (row["Страна"] || '—') + '</td>' +
                     '<td>' + (row["Место"] || '—') + '</td>' +
-                    '<td>' + (row["Широта"] || '—') + '</td>' +
-                    '<td>' + (row["Долгота"] || '—') + '</td>' +
                     '<td>' + sourceCell + '</td>' +
                 '</tr>';
             });
             
             tbody.innerHTML = html;
             
+            // Уничтожаем предыдущую таблицу если есть
+            if ($.fn.DataTable.isDataTable('#data-table')) {
+                $('#data-table').DataTable().destroy();
+            }
+            
             // Инициализация DataTables
             $('#data-table').DataTable({
                 pageLength: 25,
                 lengthMenu: [10, 25, 50, 100],
                 language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/ru.json'
+                    search: '🔍 Поиск:',
+                    lengthMenu: 'Показать _MENU_ записей',
+                    info: 'Записи с _START_ по _END_ из _TOTAL_',
+                    paginate: {
+                        first: '«',
+                        last: '»',
+                        next: '›',
+                        previous: '‹'
+                    }
                 },
-                order: [[0, 'desc']] // Сортировка по году (новые сначала)
+                order: [[0, 'desc']]
             });
             
             document.getElementById('table-status').textContent = 'Загружено ' + data.length + ' записей';
         }
         
-        // Копирование ссылки для цитирования
-        document.getElementById('citation-link').addEventListener('click', function(e) {
-            e.preventDefault();
-            var citation = 'Данные о находках Trachys minutus. DOI: [будет добавлен] • ' + window.location.href;
-            navigator.clipboard.writeText(citation).then(function() {
-                alert('✅ Ссылка для цитирования скопирована в буфер обмена!');
-            });
+        // Исправление карты при переключении вкладок
+        document.getElementById('map-tab').addEventListener('shown.bs.tab', function() {
+            setTimeout(function() {
+                map.invalidateSize();
+            }, 100);
         });
         
-        // Исправление бага с картой при переключении вкладок
         document.getElementById('table-tab').addEventListener('shown.bs.tab', function() {
-            // Небольшая задержка для корректного отображения таблицы
             setTimeout(function() {
                 if ($.fn.DataTable.isDataTable('#data-table')) {
                     $('#data-table').DataTable().columns.adjust();
                 }
             }, 100);
-        });
-        
-        document.getElementById('map-tab').addEventListener('shown.bs.tab', function() {
-            map.invalidateSize();
-        });
-        
-        // Тултипы Bootstrap
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
         });
     })();
 </script>
