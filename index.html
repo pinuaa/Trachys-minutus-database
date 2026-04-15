@@ -12,7 +12,7 @@
   <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
   <!-- Papa Parse (CSV) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <!-- Font Awesome -->
+  <!-- Простой, чистый шрифт и иконки (Font Awesome, не конфликтует) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
     * {
@@ -199,27 +199,10 @@
       border-radius: 40px;
       font-size: 0.9rem;
     }
-    .search-box {
-      padding: 12px 24px;
-      border-bottom: 1px solid #e2e8f0;
-      background: #fafcfd;
-    }
-    .search-box input {
-      width: 100%;
-      padding: 10px 16px;
-      border: 1px solid #d0dde9;
-      border-radius: 30px;
-      font-size: 0.95rem;
-      transition: all 0.2s;
-    }
-    .search-box input:focus {
-      outline: none;
-      border-color: #2b6e4f;
-      box-shadow: 0 0 0 3px rgba(43,110,79,0.1);
-    }
     .table-container {
-      max-height: 500px;
+      max-height: 380px;
       overflow-y: auto;
+      border-top: 1px solid #e2e8f0;
       scrollbar-width: thin;
     }
     table {
@@ -231,14 +214,14 @@
     th {
       text-align: left;
       padding: 14px 16px;
-      background: #f2f6fa;
+      background: #f9fbfd;
       color: #1e3b4f;
       font-weight: 600;
       position: sticky;
       top: 0;
+      background: #f2f6fa;
       box-shadow: inset 0 -1px 0 #d7e0e8;
       white-space: nowrap;
-      z-index: 10;
     }
     td {
       padding: 12px 16px;
@@ -256,48 +239,75 @@
     .source-link:hover {
       text-decoration: underline;
     }
+    /* Пагинация */
+    .pagination-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      background: #fafcfd;
+      border-top: 1px solid #e2e8f0;
+    }
     .pagination-controls {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      padding: 16px 24px;
-      background: #f8fafc;
-      border-top: 1px solid #dae1e8;
+      gap: 12px;
     }
-    .pagination-info {
-      color: #546e7a;
-      font-size: 0.9rem;
-    }
-    .pagination-buttons {
-      display: flex;
-      gap: 8px;
-    }
-    .page-btn {
-      padding: 6px 14px;
-      border: 1px solid #cbd5e1;
+    .pagination-btn {
       background: white;
-      border-radius: 6px;
-      cursor: pointer;
+      border: 1px solid #d0dce6;
+      color: #2c5e4a;
+      padding: 8px 16px;
+      border-radius: 30px;
       font-size: 0.9rem;
-      transition: all 0.1s;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
-    .page-btn:hover:not(:disabled) {
-      background: #e2e9f0;
-      border-color: #94a3b8;
+    .pagination-btn:hover:not(:disabled) {
+      background: #eaf4ef;
+      border-color: #2b6e4f;
     }
-    .page-btn:disabled {
+    .pagination-btn:disabled {
       opacity: 0.4;
       cursor: not-allowed;
+      background: #f0f3f6;
     }
-    .page-indicator {
-      padding: 6px 16px;
-      background: #e9f2f9;
-      border-radius: 6px;
-      font-weight: 500;
+    .page-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
       font-size: 0.9rem;
+      color: #3a5f77;
     }
+    .page-selector {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .page-input {
+      width: 65px;
+      padding: 6px 10px;
+      border: 1px solid #ccdae3;
+      border-radius: 24px;
+      text-align: center;
+      font-size: 0.9rem;
+      background: white;
+    }
+    .items-per-page-select {
+      padding: 6px 12px;
+      border: 1px solid #ccdae3;
+      border-radius: 24px;
+      background: white;
+      font-size: 0.9rem;
+      color: #1e3b4f;
+    }
+    /* статус загрузки */
     .loading-indicator {
-      padding: 40px;
+      padding: 20px;
       text-align: center;
       color: #3a5f77;
     }
@@ -305,10 +315,9 @@
       padding: 10px 24px 16px;
       font-size: 0.8rem;
       color: #687884;
-      border-top: 1px solid #e2e8f0;
     }
-    .text-muted {
-      color: #8899aa;
+    i {
+      margin-right: 4px;
     }
   </style>
 </head>
@@ -355,7 +364,7 @@
       </div>
       <div class="license">
         <i class="far fa-copyright"></i> Данные из открытых источников.<br>
-        <i class="fas fa-leaf"></i> Лицензия: CC BY 4.0.<br>
+        <i class="fas fa-leaf"></i> Лицензия: CC BY 4.0 (если применимо).<br>
         <span style="opacity:0.7; display:block; margin-top:8px;">📍 Координаты приближены, ссылки на оригинальные работы.</span>
       </div>
     </div>
@@ -367,14 +376,37 @@
       <h2><i class="fas fa-table"></i> Записи о находках</h2>
       <span class="row-counter" id="row-counter">0 строк</span>
     </div>
-    <div class="search-box">
-      <input type="text" id="searchInput" placeholder="🔍 Поиск по автору, стране, месту, году...">
-    </div>
     <div class="table-container" id="table-container">
       <div class="loading-indicator"><i class="fas fa-spinner fa-pulse"></i> Загрузка CSV...</div>
     </div>
+    <!-- Пагинация (изначально скрыта) -->
+    <div class="pagination-container" id="pagination-container" style="display: none;">
+      <div class="page-info">
+        <span>Показано <span id="showing-start">0</span> – <span id="showing-end">0</span> из <span id="total-items">0</span></span>
+      </div>
+      <div class="pagination-controls">
+        <button class="pagination-btn" id="first-page-btn" title="Первая страница"><i class="fas fa-angle-double-left"></i></button>
+        <button class="pagination-btn" id="prev-page-btn"><i class="fas fa-chevron-left"></i> Назад</button>
+        <div class="page-selector">
+          <span>Стр.</span>
+          <input type="number" class="page-input" id="page-input" min="1" value="1">
+          <span>из <span id="total-pages">0</span></span>
+        </div>
+        <button class="pagination-btn" id="next-page-btn">Вперёд <i class="fas fa-chevron-right"></i></button>
+        <button class="pagination-btn" id="last-page-btn" title="Последняя страница"><i class="fas fa-angle-double-right"></i></button>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="color:#5a768a;"><i class="fas fa-list"></i></span>
+        <select class="items-per-page-select" id="items-per-page">
+          <option value="25">25</option>
+          <option value="50" selected>50</option>
+          <option value="100">100</option>
+          <option value="200">200</option>
+        </select>
+      </div>
+    </div>
     <div class="footer-note">
-      <i class="far fa-check-circle"></i> Щёлкните по маркеру — увидите детали. Всего загружено <span id="total-records-count">0</span> записей.
+      <i class="far fa-check-circle"></i> Щёлкните по маркеру — увидите детали. Таблица обновляется при загрузке.
     </div>
   </div>
 </div>
@@ -391,15 +423,17 @@
     const totalSourcesSpan = document.getElementById('total-sources');
     const yearsRangeSpan = document.getElementById('years-range');
     const rowCounterSpan = document.getElementById('row-counter');
-    const totalRecordsCountSpan = document.getElementById('total-records-count');
-    const searchInput = document.getElementById('searchInput');
-
-    // ---------- Глобальные переменные ----------
-    let allRecords = [];           // все записи из CSV
-    let filteredRecords = [];      // отфильтрованные записи
-    let currentPage = 1;
-    const rowsPerPage = 50;
-    let mapInitialized = false;
+    const paginationContainer = document.getElementById('pagination-container');
+    const showingStart = document.getElementById('showing-start');
+    const showingEnd = document.getElementById('showing-end');
+    const totalItems = document.getElementById('total-items');
+    const pageInput = document.getElementById('page-input');
+    const totalPagesSpan = document.getElementById('total-pages');
+    const firstPageBtn = document.getElementById('first-page-btn');
+    const prevPageBtn = document.getElementById('prev-page-btn');
+    const nextPageBtn = document.getElementById('next-page-btn');
+    const lastPageBtn = document.getElementById('last-page-btn');
+    const itemsPerPageSelect = document.getElementById('items-per-page');
 
     // Инициализация карты
     const map = L.map('map').setView([52, 25], 4);
@@ -413,70 +447,42 @@
       showCoverageOnHover: false,
     });
 
-    // ---------- Вспомогательные функции ----------
-    function escapeHtml(text) {
-      if (!text && text !== 0) return '';
-      return String(text).replace(/[&<>"]/g, function(c) {
-        if (c === '&') return '&amp;';
-        if (c === '<') return '&lt;';
-        if (c === '>') return '&gt;';
-        if (c === '"') return '&quot;';
-        return c;
-      });
-    }
+    // Хранилище для статистики и пагинации
+    let validRecords = [];
+    let currentPage = 1;
+    let itemsPerPage = 50;
+    let totalPages = 0;
 
-    // Фильтрация записей по поисковому запросу
-    function filterRecords(query) {
-      if (!query || query.trim() === '') {
-        filteredRecords = [...allRecords];
-      } else {
-        const q = query.toLowerCase().trim();
-        filteredRecords = allRecords.filter(rec => {
-          return (
-            (rec.author && rec.author.toLowerCase().includes(q)) ||
-            (rec.country && rec.country.toLowerCase().includes(q)) ||
-            (rec.place && rec.place.toLowerCase().includes(q)) ||
-            (rec.year && rec.year.toString().includes(q))
-          );
-        });
-      }
-      currentPage = 1;
-      renderTablePage();
-      updateRowCounter();
-    }
-
-    // Рендер текущей страницы таблицы
+    // ---------- Функция рендера таблицы и статистики ----------
     function renderTablePage() {
-      if (filteredRecords.length === 0) {
-        tableContainer.innerHTML = `<div style="padding:40px; text-align:center; color:#6f8a9b;">
-          <i class="fas fa-search" style="font-size:2rem; opacity:0.5; margin-bottom:16px; display:block;"></i>
-          Ничего не найдено. Попробуйте изменить поисковый запрос.
-        </div>`;
+      if (validRecords.length === 0) {
+        tableContainer.innerHTML = `<div style="padding:30px;text-align:center;color:#6f8a9b;">Нет данных для отображения. Проверьте CSV.</div>`;
+        paginationContainer.style.display = 'none';
         return;
       }
 
-      const totalPages = Math.ceil(filteredRecords.length / rowsPerPage);
-      const startIdx = (currentPage - 1) * rowsPerPage;
-      const endIdx = Math.min(startIdx + rowsPerPage, filteredRecords.length);
-      const pageRecords = filteredRecords.slice(startIdx, endIdx);
+      // Вычисляем пагинацию
+      totalPages = Math.ceil(validRecords.length / itemsPerPage);
+      if (currentPage > totalPages) currentPage = totalPages;
+      if (currentPage < 1) currentPage = 1;
       
+      const startIdx = (currentPage - 1) * itemsPerPage;
+      const endIdx = Math.min(startIdx + itemsPerPage, validRecords.length);
+      const displayRecords = validRecords.slice(startIdx, endIdx);
+      
+      // Обновляем таблицу
       let tableHtml = `<table><thead><tr>
-        <th>#</th><th>Автор</th><th>Год</th><th>Страна</th><th>Место</th><th>Источник</th>
+        <th>Автор</th><th>Год</th><th>Страна</th><th>Место</th><th>Источник</th>
       </tr></thead><tbody>`;
-      
-      pageRecords.forEach((rec, idx) => {
-        const globalIdx = startIdx + idx + 1;
+
+      displayRecords.forEach(rec => {
         const author = rec.author || '—';
         const year = rec.year || '—';
         const country = rec.country || '—';
         const place = rec.place || '—';
         const link = rec.link || '#';
-        const sourceDisplay = (link && link !== '#') ? 
-          `<a class="source-link" href="${link}" target="_blank" title="Открыть источник"><i class="fas fa-external-link-alt"></i></a>` : 
-          '<span class="text-muted">—</span>';
-        
+        const sourceDisplay = (link && link !== '#') ? `<a class="source-link" href="${link}" target="_blank" title="Открыть источник"><i class="fas fa-external-link-alt"></i> ссылка</a>` : '—';
         tableHtml += `<tr>
-          <td class="text-muted">${globalIdx}</td>
           <td>${escapeHtml(author)}</td>
           <td>${escapeHtml(year)}</td>
           <td>${escapeHtml(country)}</td>
@@ -484,54 +490,53 @@
           <td>${sourceDisplay}</td>
         </tr>`;
       });
-      
       tableHtml += `</tbody></table>`;
-      
-      // Пагинация
-      tableHtml += `<div class="pagination-controls">
-        <div class="pagination-info">
-          Показаны ${startIdx + 1}-${endIdx} из ${filteredRecords.length} записей
-          ${filteredRecords.length !== allRecords.length ? '<span style="margin-left:12px; color:#e67e22;"><i class="fas fa-filter"></i> Отфильтровано из ' + allRecords.length + '</span>' : ''}
-        </div>
-        <div class="pagination-buttons">
-          <button class="page-btn" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
-            <i class="fas fa-chevron-left"></i> Назад
-          </button>
-          <span class="page-indicator">${currentPage} / ${totalPages}</span>
-          <button class="page-btn" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
-            Вперед <i class="fas fa-chevron-right"></i>
-          </button>
-        </div>
-      </div>`;
-      
       tableContainer.innerHTML = tableHtml;
-    }
-
-    function updateRowCounter() {
-      rowCounterSpan.innerText = `${filteredRecords.length} строк`;
-      totalRecordsCountSpan.innerText = allRecords.length;
-    }
-
-    // Глобальная функция смены страницы
-    window.changePage = function(page) {
-      const totalPages = Math.ceil(filteredRecords.length / rowsPerPage);
-      if (page >= 1 && page <= totalPages) {
-        currentPage = page;
-        renderTablePage();
-        // Прокрутка таблицы вверх
-        tableContainer.scrollTop = 0;
-      }
-    };
-
-    // Обновление статистики и карты
-    function updateStatsAndMap(records) {
-      // Статистика
-      totalPointsSpan.innerText = records.length;
       
+      // Обновляем элементы пагинации
+      showingStart.textContent = startIdx + 1;
+      showingEnd.textContent = endIdx;
+      totalItems.textContent = validRecords.length;
+      pageInput.value = currentPage;
+      pageInput.max = totalPages;
+      totalPagesSpan.textContent = totalPages;
+      
+      paginationContainer.style.display = 'flex';
+      
+      // Состояние кнопок
+      firstPageBtn.disabled = currentPage === 1;
+      prevPageBtn.disabled = currentPage === 1;
+      nextPageBtn.disabled = currentPage === totalPages;
+      lastPageBtn.disabled = currentPage === totalPages;
+    }
+
+    function renderUI(records) {
+      validRecords = records;
+      
+      // Сброс на первую страницу
+      currentPage = 1;
+      itemsPerPage = parseInt(itemsPerPageSelect.value) || 50;
+      
+      if (records.length === 0) {
+        tableContainer.innerHTML = `<div style="padding:30px;text-align:center;color:#6f8a9b;">Нет данных для отображения. Проверьте CSV.</div>`;
+        rowCounterSpan.innerText = `0 строк`;
+        totalPointsSpan.innerText = '0';
+        totalCountriesSpan.innerText = '0';
+        totalSourcesSpan.innerText = '0';
+        yearsRangeSpan.innerText = '—';
+        paginationContainer.style.display = 'none';
+        return;
+      }
+
+      renderTablePage();
+      
+      // Общая статистика
+      rowCounterSpan.innerText = `${records.length} строк`;
+      totalPointsSpan.innerText = records.length;
+
       const countries = new Set();
       const sourcesSet = new Set();
       let minYear = Infinity, maxYear = -Infinity;
-      
       records.forEach(r => {
         if (r.country) countries.add(r.country);
         if (r.link && r.link !== '#') sourcesSet.add(r.link);
@@ -543,17 +548,18 @@
           }
         }
       });
-      
       totalCountriesSpan.innerText = countries.size;
       totalSourcesSpan.innerText = sourcesSet.size;
-      yearsRangeSpan.innerText = (minYear !== Infinity) ? `${minYear} – ${maxYear}` : '—';
-      
-      // Маркеры на карте
+      if (minYear !== Infinity && maxYear !== -Infinity) {
+        yearsRangeSpan.innerText = `${minYear} – ${maxYear}`;
+      } else {
+        yearsRangeSpan.innerText = '—';
+      }
+
+      // Добавляем маркеры на карту
       markerClusterGroup.clearLayers();
-      let markersAdded = 0;
-      
       records.forEach(rec => {
-        if (rec.lat !== undefined && rec.lng !== undefined && !isNaN(rec.lat) && !isNaN(rec.lng)) {
+        if (rec.lat !== undefined && rec.lng !== undefined) {
           const marker = L.marker([rec.lat, rec.lng]).bindPopup(`
             <b>${escapeHtml(rec.author || 'неизв.')}</b><br>
             📅 ${escapeHtml(rec.year || '—')}<br>
@@ -561,50 +567,62 @@
             ${rec.link && rec.link !== '#' ? `<a href="${rec.link}" target="_blank">📄 источник</a>` : ''}
           `);
           markerClusterGroup.addLayer(marker);
-          markersAdded++;
         }
       });
-      
-      if (!map.hasLayer(markerClusterGroup)) {
-        map.addLayer(markerClusterGroup);
-      }
-      
-      // Масштабирование карты под все маркеры
-      if (markersAdded > 0) {
+      map.addLayer(markerClusterGroup);
+      if (records.length > 0) {
         try {
-          const validCoords = records.filter(r => r.lat && r.lng && !isNaN(r.lat) && !isNaN(r.lng));
-          if (validCoords.length > 0) {
-            const bounds = L.latLngBounds(validCoords.map(r => [r.lat, r.lng]));
-            if (bounds.isValid()) {
-              map.fitBounds(bounds, { padding: [30, 30], maxZoom: 12 });
-            }
-          }
-        } catch (e) {
-          console.warn('Не удалось масштабировать карту:', e);
-        }
+          const bounds = L.latLngBounds(records.filter(r => r.lat && r.lng).map(r => [r.lat, r.lng]));
+          if (bounds.isValid()) map.fitBounds(bounds, { padding: [30, 30], maxZoom: 12 });
+        } catch (e) {}
       }
-      
-      console.log(`✅ Добавлено маркеров: ${markersAdded} из ${records.length} записей`);
     }
 
-    // Основная функция рендера после загрузки CSV
-    function initializeData(records) {
-      allRecords = records;
-      filteredRecords = [...allRecords];
-      
-      // Обновляем UI
-      updateStatsAndMap(allRecords);
-      renderTablePage();
-      updateRowCounter();
-      
-      // Поиск
-      searchInput.addEventListener('input', (e) => {
-        filterRecords(e.target.value);
-        updateStatsAndMap(filteredRecords);
+    // Простейший escape
+    function escapeHtml(text) {
+      if (!text) return text;
+      return String(text).replace(/[&<>"]/g, function(c) {
+        if (c === '&') return '&amp;';
+        if (c === '<') return '&lt;';
+        if (c === '>') return '&gt;';
+        if (c === '"') return '&quot;';
+        return c;
       });
     }
+
+    // Обработчики пагинации
+    function goToPage(page) {
+      if (page < 1) page = 1;
+      if (page > totalPages) page = totalPages;
+      if (currentPage !== page) {
+        currentPage = page;
+        renderTablePage();
+      }
+    }
+
+    firstPageBtn.addEventListener('click', () => goToPage(1));
+    prevPageBtn.addEventListener('click', () => goToPage(currentPage - 1));
+    nextPageBtn.addEventListener('click', () => goToPage(currentPage + 1));
+    lastPageBtn.addEventListener('click', () => goToPage(totalPages));
+    
+    pageInput.addEventListener('change', function() {
+      let page = parseInt(this.value);
+      if (isNaN(page)) page = 1;
+      goToPage(page);
+    });
+    
+    itemsPerPageSelect.addEventListener('change', function() {
+      itemsPerPage = parseInt(this.value);
+      currentPage = 1;
+      if (validRecords.length > 0) {
+        totalPages = Math.ceil(validRecords.length / itemsPerPage);
+        renderTablePage();
+      }
+    });
 
     // ---------- Загрузка CSV ----------
+    tableContainer.innerHTML = `<div class="loading-indicator"><i class="fas fa-spinner fa-pulse"></i> Чтение trachys_min_occurences.csv ...</div>`;
+
     Papa.parse("trachys_min_occurences.csv", {
       download: true,
       header: true,
@@ -612,68 +630,45 @@
       encoding: 'UTF-8',
       complete: function(results) {
         const data = results.data;
-        console.log(`📊 Загружено строк из CSV: ${data.length}`);
-        console.log('📋 Заголовки:', results.meta.fields);
+        console.log('📊 Загружено строк:', data.length, 'Fields:', results.meta.fields);
         
         const records = [];
-        let skippedNoCoords = 0;
-        let skippedInvalidCoords = 0;
-        
         data.forEach((row, idx) => {
-          // Поиск координат (гибкие названия колонок)
+          // Гибкий поиск колонок (из-за пробелов, регистра)
           const latRaw = row["Широта"] || row["Широта "] || row["широта"] || row["Latitude"] || row["lat"];
           const lngRaw = row["Долгота"] || row["Долгота "] || row["долгота"] || row["Longitude"] || row["lng"];
           const lat = parseFloat(latRaw);
           const lng = parseFloat(lngRaw);
           
-          // Извлечение остальных полей
-          const author = row["Автор"] || row["Author"] || "";
-          const year = row["Год публикации"] || row["Year"] || "";
-          const country = row["Страна"] || row["Country"] || "";
-          const place = row["Место"] || row["Place"] || "";
-          const link = row["Ссылка"] || row["Link"] || "#";
-          
-          // Проверка: запись добавляется ВСЕГДА, даже без координат
-          // Но координаты сохраняем только если они валидны
-          const hasValidCoords = !isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0;
-          
-          if (!hasValidCoords) {
-            if (isNaN(lat) || isNaN(lng)) {
-              skippedInvalidCoords++;
-            } else if (lat === 0 || lng === 0) {
-              skippedNoCoords++;
-            }
+          if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
+            const author = row["Автор"] || row["Author"] || "";
+            const year = row["Год публикации"] || row["Year"] || "";
+            const country = row["Страна"] || row["Country"] || "";
+            const place = row["Место"] || row["Place"] || "";
+            const link = row["Ссылка"] || row["Link"] || "#";
+            
+            records.push({
+              lat, lng,
+              author: author.trim(),
+              year: year.toString().trim(),
+              country: country.trim(),
+              place: place.trim(),
+              link: link.trim()
+            });
           }
-          
-          records.push({
-            lat: hasValidCoords ? lat : null,
-            lng: hasValidCoords ? lng : null,
-            author: author.trim(),
-            year: year.toString().trim(),
-            country: country.trim(),
-            place: place.trim(),
-            link: link.trim()
-          });
         });
-        
-        console.log(`📈 Всего записей обработано: ${records.length}`);
-        console.log(`⚠️ Пропущено координат: некорректных ${skippedInvalidCoords}, нулевых ${skippedNoCoords}`);
-        
-        // Инициализация данных
-        initializeData(records);
+
+        renderUI(records);
         
         if (records.length === 0) {
-          tableContainer.innerHTML = `<div style="padding:40px; color:#b33; text-align:center;">
-            <i class="fas fa-exclamation-triangle"></i> Не удалось загрузить данные. Проверьте CSV.
-          </div>`;
+          tableContainer.innerHTML = `<div style="padding:30px; color:#b33;">⚠️ Не найдено корректных координат. Проверьте заголовки CSV (Широта, Долгота).</div>`;
         }
       },
       error: function(err) {
-        console.error('Ошибка загрузки CSV:', err);
-        tableContainer.innerHTML = `<div style="padding:40px; color:#b33; text-align:center;">
-          <i class="fas fa-exclamation-triangle"></i> Ошибка загрузки файла trachys_min_occurences.csv
-        </div>`;
+        console.error(err);
+        tableContainer.innerHTML = `<div style="padding:30px; color:#b33;"><i class="fas fa-exclamation-triangle"></i> Ошибка загрузки файла. Убедитесь, что trachys_min_occurences.csv в корне.</div>`;
         rowCounterSpan.innerText = 'ошибка';
+        paginationContainer.style.display = 'none';
       }
     });
 
