@@ -4,6 +4,7 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19588788.svg)](https://doi.org/10.5281/zenodo.19588788)
 
 Интерактивная карта и таблица находок златки *Trachys minutus* (Linnaeus, 1758) (Coleoptera: Buprestidae), составленная на основе открытых литературных источников.
+Доступна по адресу: https://pinuaa.github.io/Trachys-minutus-database/
 
 ## 📌 О проекте
 
